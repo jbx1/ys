@@ -9,8 +9,7 @@ paths:
       summary: Creates a new accreditation.
       operationId: createAccreditation
       tags:
-        - admin
-        - accreditations
+        - Admin
       requestBody:
         description: An accreditation request.
         content:
@@ -24,8 +23,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CreateAccreditationResponse'
-
-
 
 components:
   schemas:
