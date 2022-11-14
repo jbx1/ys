@@ -1,0 +1,56 @@
+openapi: "3.0.0"
+info:
+  title: User Accreditation API
+  description: Provides historical and real-time data reports.
+  version: 1.0.0
+paths:
+  /user/{user_id}/accreditation:
+    get:
+      summary: Query the status of accreditations for a user.
+      operationId: getAccreditationStatuses
+      tags:
+        - user
+        - accreditations
+      parameters:
+        - in: path
+          name: user_id
+          schema:
+            type: string
+          required: true
+          description: ID of the user
+      responses:
+        200:
+          description: Accreditation request was successful.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccreditationStatusResponse'
+
+components:
+  schemas:
+    AccreditationStatusResponse:
+      type: object
+      properties:
+        user_id:
+          type: string
+        accreditation_statuses:
+          type: array
+          items:
+            $ref: "#/components/schemas/AccreditationStatus"
+
+    AccreditationStatus:
+      type: object
+      properties:
+        accreditation_type:
+          type: string
+          enum:
+            - "BY_INCOME"
+            - "BY_NET_WORTH"
+        status:
+          type: string
+          enum:
+            - "PENDING"
+            - "CONFIRMED"
+            - "FAILED"
+            - "EXPIRED"
+
