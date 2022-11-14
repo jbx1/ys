@@ -1,4 +1,31 @@
 spring:
-  mvc:
-    pathmatch:
-      matching-strategy: ant_path_matcher
+  application.name: accreditation-api
+  mvc.pathmatch.matching-strategy: ant_path_matcher
+  autoconfigure.exclude: org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:yieldstreet}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  flyway:
+    locations: classpath:db/migration
+    enabled: true
+  jpa:
+    show-sql: false
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc.lob.non_contextual_creation: true
+        format_sql: true
+
+server:
+  port: ${HTTP_PORT:8080}
+  forward-headers-strategy: framework
+  error:
+    include-message: always
+
+logging:
+  level:
+    org.springframework.web: WARN
+    org.hibernate: WARN
+    org.apache: WARN

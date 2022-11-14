@@ -1,0 +1,170 @@
+openapi: "3.0.0"
+info:
+  title: User Accreditation API
+  description: Provides historical and real-time data reports.
+  version: 1.0.0
+paths:
+  /user/accreditation:
+    post:
+      summary: Creates a new accreditation.
+      operationId: createAccreditation
+      tags:
+        - Admin
+      requestBody:
+        description: An accreditation request.
+        content:
+          application/json:
+            schema:
+              $ref : '#/components/schemas/CreateAccreditationRequest'
+      responses:
+        200:
+          description: Accreditation request was successful.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccreditationResponse'
+
+  /user/accreditation/{accreditationId}:
+    put:
+      summary: Update the status of an accreditation request.
+      operationId: finalizeAccreditation
+      tags:
+        - Admin
+      parameters:
+        - in: path
+          name: accreditationId
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: ID of the accreditation request.
+      requestBody:
+        description: The accreditation to finalize
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FinaliseAccreditationRequest'
+      responses:
+        200:
+          description: Accreditation finalisation request was successful.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccreditationResponse'
+
+
+  /user/{userId}/accreditation:
+    get:
+      summary: Query the status of accreditations for a user.
+      operationId: getAccreditationStatuses
+      tags:
+        - User
+      parameters:
+        - in: path
+          name: userId
+          schema:
+            type: string
+          required: true
+          description: ID of the user
+      responses:
+        200:
+          description: Accreditation request was successful.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccreditationStatusResponse'
+
+components:
+  schemas:
+    CreateAccreditationRequest:
+      type: object
+      properties:
+        user_id:
+          type: string
+        accreditation_type:
+          $ref: '#/components/schemas/AccreditationType'
+        document:
+          $ref: "#/components/schemas/Document"
+      required:
+        - user_id
+        - accreditation_type
+        - document
+
+    Document:
+      type: object
+      properties:
+        name:
+          type: string
+        mime_type:
+          type: string
+        content:
+          type: string
+      required:
+        - name
+        - mime_type
+        - content
+
+    FinaliseAccreditationRequest:
+      type: object
+      properties:
+        outcome:
+          $ref: '#/components/schemas/FinalStatus'
+
+    AccreditationResponse:
+      type: object
+      properties:
+        accreditation_id:
+          type: string
+          format: uuid
+      required:
+        - accreditation_id
+
+
+    AccreditationStatusResponse:
+      type: object
+      properties:
+        user_id:
+          type: string
+        accreditation_statuses:
+          type: array
+          items:
+            $ref: "#/components/schemas/AccreditationStatus"
+      required:
+        - user_id
+        - accreditation_statuses
+
+    AccreditationStatus:
+      type: object
+      properties:
+        accreditation_type:
+          $ref: '#/components/schemas/AccreditationType'
+        status:
+          $ref: '#/components/schemas/Status'
+      required:
+        - accreditation_type
+        - status
+
+    AccreditationType:
+      type: string
+      enum:
+        - "BY_INCOME"
+        - "BY_NET_WORTH"
+
+    FinalStatus:
+      type: string
+      enum:
+        - "CONFIRMED"
+        - "FAILED"
+        - "EXPIRED"
+
+    Status:
+      type: string
+      enum:
+        - "PENDING"
+        - "CONFIRMED"
+        - "FAILED"
+        - "EXPIRED"
+      default: "PENDING"
+
+#Would have been nice to combine FinalStatus with Status to reuse the same definitions, but enum extensibility is not properly supported yet
+#https://github.com/OAI/OpenAPI-Specification/issues/1552

@@ -21,11 +21,10 @@
             <version>2.7.5</version>
         </dependency>
         <dependency>
-            <groupId>org.springframework.data</groupId>
-            <artifactId>spring-data-jpa</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
             <version>2.7.5</version>
         </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
@@ -37,7 +36,16 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <version>2.7.5</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+            <version>9.8.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.5.0</version>
+        </dependency>
         <dependency>
             <groupId>org.openapitools</groupId>
             <artifactId>jackson-databind-nullable</artifactId>
@@ -75,32 +83,13 @@
                 <version>6.2.1</version>
                 <executions>
                     <execution>
-                        <id>admin-api</id>
+                        <id>accreditation-api</id>
                         <goals>
                             <goal>generate</goal>
                         </goals>
                         <configuration>
                             <inputSpec>
-                                ${project.basedir}/src/main/resources/api/accreditation-admin.yml
-                            </inputSpec>
-                            <generatorName>spring</generatorName>
-                            <apiPackage>com.yieldstreet.api</apiPackage>
-                            <modelPackage>com.yieldstreet.model</modelPackage>
-                            <configOptions>
-                                <useTags>true</useTags>
-                                <delegatePattern>false</delegatePattern>
-                            </configOptions>
-                        </configuration>
-                    </execution>
-
-                    <execution>
-                        <id>user-api</id>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <configuration>
-                            <inputSpec>
-                                ${project.basedir}/src/main/resources/api/accreditation-user.yml
+                                ${project.basedir}/src/main/resources/api/accreditation-api.yml
                             </inputSpec>
                             <generatorName>spring</generatorName>
                             <apiPackage>com.yieldstreet.api</apiPackage>
