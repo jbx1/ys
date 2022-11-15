@@ -65,9 +65,5 @@ public class AdminApiImpl implements AdminApi {
     public UnableToPerformOperationException(String reason) {
       super(reason);
     }
-
-    public UnableToPerformOperationException(Throwable cause) {
-      super("Unable to perform operation.", cause);
-    }
   }
 }

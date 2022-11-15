@@ -13,6 +13,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
 
 import java.nio.charset.StandardCharsets;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.UUID;
 import java.util.function.Supplier;
 
@@ -20,7 +22,7 @@ import java.util.function.Supplier;
 public class KafkaProducer {
   private static final Logger logger = LoggerFactory.getLogger(KafkaProducer.class);
 
-  /** The Spring Reactor Sink used for Kafka * */
+  /** The Spring Reactor Sink used for Kafka */
   private final Sinks.Many<Message<AccreditationStateChange>> many;
 
   public KafkaProducer(Sinks.Many<Message<AccreditationStateChange>> many) {
@@ -54,9 +56,17 @@ public class KafkaProducer {
       Status status,
       Status oldStatus) {
     String userId = request.getUserId();
+    OffsetDateTime timestamp = OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC);
+
     AccreditationStateChange stateChange =
         new AccreditationStateChange(
-            action, userId, accreditationId.toString(), status, oldStatus, request);
+            timestamp,
+            action,
+            userId,
+            accreditationId.toString(),
+            status,
+            oldStatus,
+            request);
 
     Message<AccreditationStateChange> message =
         MessageBuilder.withPayload(stateChange)
