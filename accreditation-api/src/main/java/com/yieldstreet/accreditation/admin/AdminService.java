@@ -10,8 +10,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -49,8 +51,7 @@ public class AdminService {
 
   @Transactional
   public void expireOldConfirmedAccreditations() {
-    //todo: change this to minus days
-    OffsetDateTime updateBeforeTs = OffsetDateTime.now().minusMinutes(expireConfirmedDays);
+    OffsetDateTime updateBeforeTs = OffsetDateTime.now().minusDays(expireConfirmedDays);
 
     List<Accreditation> oldConfirmedAccreditations =
         accreditationRepository.findAccreditationByStatusAndUpdatedTsBefore(
@@ -69,8 +70,15 @@ public class AdminService {
   public AccreditationResponse createAccreditation(
       CreateAccreditationRequest createAccreditationRequest) {
 
-    User user = getOrCreateUser(createAccreditationRequest.getUserId());
-    // todo: check that the user does not have another accreditation request PENDING
+    String userId = createAccreditationRequest.getUserId();
+    List<Accreditation> pendingRequests = accreditationRepository.findByUserUserIdAndStatus(userId, Accreditation.AccreditationStatus.PENDING);
+    if (!pendingRequests.isEmpty()) {
+      String msg = String.format("User %s already has %d PENDING request(s).", userId, pendingRequests.size());
+      logger.warn(msg);
+      throw new InvalidOperationException(msg);
+    }
+
+    User user = getOrCreateUser(userId);
 
     Accreditation accreditation = new Accreditation();
     accreditation.setUser(user);
@@ -98,15 +106,28 @@ public class AdminService {
   }
 
   private AccreditationResponse finalizeAccreditation(
-      Accreditation accreditation, FinalStatus status) {
-    // todo: check that the accreditation is not already failed
+      Accreditation accreditation, FinalStatus finalStatus) {
 
+    Accreditation.AccreditationStatus newStatus = mapToDatabaseStatus(finalStatus);
     Accreditation.AccreditationStatus oldStatus = accreditation.getStatus();
-    updateUsingStampedLock(accreditation, status);
+
+    if (newStatus.equals(oldStatus)) {
+      //make the API call idempotent (PUT should be), just return the same result
+      logger.info("Idempotent finalisation of {} with status {} when it was already {}", accreditation.getId(), newStatus, oldStatus);
+      return new AccreditationResponse().accreditationId(accreditation.getId());
+    }
+
+    if (accreditation.getStatus().equals(Accreditation.AccreditationStatus.FAILED)) {
+      String msg = String.format("Accreditation request %s is already in FAILED status. Cannot update further.", accreditation.getId());
+      logger.warn(msg);
+      throw new InvalidOperationException(accreditation.getId() + " is already in FAILED status.");
+    }
+
+    updateUsingStampedLock(accreditation, newStatus);
     // we re-create the original request from the data so message is self-contained
     CreateAccreditationRequest request = recreateRequest(accreditation);
     kafkaProducer.notifyFinalise(
-        request, accreditation.getId(), mapToStatus(status), mapToStatus(oldStatus));
+        request, accreditation.getId(), mapToStatus(finalStatus), mapToStatus(oldStatus));
 
     return new AccreditationResponse().accreditationId(accreditation.getId());
   }
@@ -119,13 +140,13 @@ public class AdminService {
         accreditation.getUpdatedTs(),
         oldStatus);
 
-    updateUsingStampedLock(accreditation, FinalStatus.EXPIRED);
+    updateUsingStampedLock(accreditation, mapToDatabaseStatus(FinalStatus.EXPIRED));
     // we re-create the original request from the data so message is self-contained
     CreateAccreditationRequest request = recreateRequest(accreditation);
     kafkaProducer.notifyScheduledExpire(request, accreditation.getId(), mapToStatus(oldStatus));
   }
 
-  private void updateUsingStampedLock(Accreditation accreditation, FinalStatus status) {
+  private void updateUsingStampedLock(Accreditation accreditation, Accreditation.AccreditationStatus status) {
     OffsetDateTime updatedTs = accreditation.getUpdatedTs();
     logger.info(
         "Finalising Accreditation {} last updated on {} with status {}",
@@ -135,14 +156,13 @@ public class AdminService {
 
     // we use the updatedTs timestamp as a stamped lock, to avoid pessimistic locking
     int updated =
-        accreditationRepository.finaliseAccreditationStatus(
-            mapToDatabaseStatus(status), accreditation.getId(), updatedTs);
+        accreditationRepository.finaliseAccreditationStatus(status, accreditation.getId(), updatedTs);
 
     logger.debug("Updated {}", updated);
     if (updated == 0) {
       logger.warn(
           "No accreditation status update took place! Did someone else updated it in parallel?");
-      throw new RuntimeException("Concurrent accreditation update aborted to avoid conflict.");
+      throw new InvalidOperationException("Concurrent accreditation update aborted to avoid conflict.");
     } else if (updated > 1) {
       logger.warn("Somehow more than one record was updated (which should be impossible).");
     }
@@ -177,5 +197,12 @@ public class AdminService {
     document.setMimeType(accreditation.getDocumentMimeType());
     createAccreditationRequest.setDocument(document);
     return createAccreditationRequest;
+  }
+
+  @ResponseStatus(value = HttpStatus.BAD_REQUEST, reason = "Invalid Operation")
+  public static class InvalidOperationException extends RuntimeException {
+    public InvalidOperationException(String reason) {
+      super(reason);
+    }
   }
 }

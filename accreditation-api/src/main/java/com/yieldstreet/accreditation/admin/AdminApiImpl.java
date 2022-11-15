@@ -35,6 +35,8 @@ public class AdminApiImpl implements AdminApi {
     try {
       AccreditationResponse response = adminService.createAccreditation(request);
       return ResponseEntity.ok(response);
+    } catch (AdminService.InvalidOperationException ex) {
+      throw ex;
     } catch (Exception ex) {
       logger.error("Unable to perform operation", ex);
       // let's avoid leaking internal errors to the front-end
@@ -52,6 +54,8 @@ public class AdminApiImpl implements AdminApi {
           .finalizeAccreditation(accreditationId, finaliseAccreditationRequest.getOutcome())
           .map(ResponseEntity::ok)
           .orElseGet(() -> ResponseEntity.notFound().build());
+    } catch (AdminService.InvalidOperationException ex) {
+      throw ex;
     } catch (Exception ex) {
       logger.error("Unable to perform operation", ex);
       // let's avoid leaking internal errors to the front-end

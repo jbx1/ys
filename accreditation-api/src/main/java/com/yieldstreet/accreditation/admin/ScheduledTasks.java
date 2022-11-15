@@ -19,7 +19,7 @@ public class ScheduledTasks {
     /**
      * Run this every day at midnight.
      */
-    @Scheduled(cron = "0 * 17 * * ?")
+    @Scheduled(cron = "0 0 0 * * ?")
     public void expireOldConfirmed() {
         logger.info("Running scheduled task to expire old confirmed accreditation requests.");
         adminService.expireOldConfirmedAccreditations();

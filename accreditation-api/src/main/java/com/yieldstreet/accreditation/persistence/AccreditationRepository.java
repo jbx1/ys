@@ -17,6 +17,10 @@ public interface AccreditationRepository
 
   List<Accreditation> findByUserUserIdOrderByCreatedTs(String userId);
 
+  List<Accreditation> findByUserUserIdAndStatus(String userId, Accreditation.AccreditationStatus status);
+
+  List<Accreditation> findAccreditationByStatusAndUpdatedTsBefore(Accreditation.AccreditationStatus status, OffsetDateTime updatedBeforeTs);
+
   @Modifying
   @Query(
       "update Accreditation a set a.status = :status, a.updatedTs = CURRENT_TIMESTAMP " +
@@ -26,5 +30,4 @@ public interface AccreditationRepository
       @Param("accreditationId") UUID accreditationId,
       @Param("updatedTs") OffsetDateTime updatedTs);
 
-  List<Accreditation> findAccreditationByStatusAndUpdatedTsBefore(Accreditation.AccreditationStatus status, OffsetDateTime updatedBeforeTs);
 }
