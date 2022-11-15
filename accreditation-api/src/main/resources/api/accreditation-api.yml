@@ -39,7 +39,7 @@ paths:
           required: true
           description: ID of the accreditation request.
       requestBody:
-        description: The accreditation to finalize
+        description: The accreditation to finalize.
         content:
           application/json:
             schema:
@@ -126,8 +126,8 @@ components:
         user_id:
           type: string
         accreditation_statuses:
-          type: array
-          items:
+          type: object
+          additionalProperties:
             $ref: "#/components/schemas/AccreditationStatus"
       required:
         - user_id

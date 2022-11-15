@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -63,10 +64,14 @@ public class AdminService {
     private AccreditationResponse finalizeAccreditation(Accreditation accreditation, FinalStatus status) {
         //todo: check that the accreditation is not already failed
         OffsetDateTime updatedTs = accreditation.getUpdatedTs();
-        accreditation.setStatus(mapAccreditationStatus(status));
-
+        logger.info("Finalising Accreditation {} last updated on {} with status {}", accreditation.getId(), updatedTs, status);
         //we use the updatedTs timestamp as a stamped lock, to avoid pessimistic locking
-        int updated = accreditationRepository.finaliseAccreditationStatus(mapAccreditationStatus(status), accreditation.getId(), updatedTs);
+        int updated = accreditationRepository.finaliseAccreditationStatus(
+                mapAccreditationStatus(status),
+                accreditation.getId(),
+                updatedTs);
+
+        logger.debug("Updated {}", updated);
         if (updated != 1) {
             logger.warn("No accreditation status update took place! Did someone else updated it in parallel?");
             throw new RuntimeException("Concurrent accreditation update aborted to avoid conflict.");

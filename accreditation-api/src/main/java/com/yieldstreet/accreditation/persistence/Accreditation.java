@@ -8,7 +8,7 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "accreditation")
+@Table(name = "accreditations")
 public class Accreditation implements Serializable {
 
     private static final long serialVersionUID = 1L;
