@@ -18,61 +18,63 @@ import java.util.stream.Collectors;
 @RestController
 public class UserApiImpl implements UserApi {
 
-    private static final Logger logger = LoggerFactory.getLogger(UserApiImpl.class);
+  private static final Logger logger = LoggerFactory.getLogger(UserApiImpl.class);
 
-    private final UserService userService;
+  private final UserService userService;
 
-    public UserApiImpl(UserService userService) {
-        this.userService = userService;
+  public UserApiImpl(UserService userService) {
+    this.userService = userService;
+  }
+
+  @Override
+  public ResponseEntity<AccreditationStatusResponse> getAccreditationStatuses(String userId) {
+    logger.info("Getting accreditations for user {}", userId);
+    List<Accreditation> userAccreditations = userService.getUserAccreditations(userId);
+
+    AccreditationStatusResponse response = new AccreditationStatusResponse();
+    response.setUserId(userId);
+
+    Map<String, AccreditationStatus> accreditations =
+        userAccreditations.stream()
+            .collect(
+                Collectors.toMap(
+                    accreditation -> accreditation.getId().toString(), this::mapToStatus));
+
+    response.setAccreditationStatuses(accreditations);
+
+    return ResponseEntity.ok(response);
+  }
+
+  private AccreditationStatus mapToStatus(Accreditation accreditation) {
+    AccreditationStatus accreditationStatus = new AccreditationStatus();
+    switch (accreditation.getStatus()) {
+      case FAILED:
+        accreditationStatus.setStatus(Status.FAILED);
+        break;
+
+      case CONFIRMED:
+        accreditationStatus.setStatus(Status.CONFIRMED);
+        break;
+
+      case EXPIRED:
+        accreditationStatus.setStatus(Status.EXPIRED);
+        break;
+
+      default:
+        accreditationStatus.setStatus(Status.PENDING);
+        break;
     }
 
-    @Override
-    public ResponseEntity<AccreditationStatusResponse> getAccreditationStatuses(String userId) {
-        logger.info("Getting accreditations for user {}", userId);
-        List<Accreditation> userAccreditations = userService.getUserAccreditations(userId);
+    switch (accreditation.getType()) {
+      case BY_INCOME:
+        accreditationStatus.setAccreditationType(AccreditationType.INCOME);
+        break;
 
-        AccreditationStatusResponse response = new AccreditationStatusResponse();
-        response.setUserId(userId);
-
-        Map<String, AccreditationStatus> accreditations = userAccreditations.stream()
-                .collect(Collectors.toMap(accreditation -> accreditation.getId().toString(),
-                        this::mapToStatus));
-
-        response.setAccreditationStatuses(accreditations);
-
-        return ResponseEntity.ok(response);
+      case BY_NET_WORTH:
+        accreditationStatus.setAccreditationType(AccreditationType.NET_WORTH);
+        break;
     }
 
-    private AccreditationStatus mapToStatus(Accreditation accreditation) {
-        AccreditationStatus accreditationStatus = new AccreditationStatus();
-        switch (accreditation.getStatus()) {
-            case FAILED:
-                accreditationStatus.setStatus(Status.FAILED);
-                break;
-
-            case CONFIRMED:
-                accreditationStatus.setStatus(Status.CONFIRMED);
-                break;
-
-            case EXPIRED:
-                accreditationStatus.setStatus(Status.EXPIRED);
-                break;
-
-            default:
-                accreditationStatus.setStatus(Status.PENDING);
-                break;
-        }
-
-        switch (accreditation.getType()) {
-            case BY_INCOME:
-                accreditationStatus.setAccreditationType(AccreditationType.INCOME);
-                break;
-
-            case BY_NET_WORTH:
-                accreditationStatus.setAccreditationType(AccreditationType.NET_WORTH);
-                break;
-        }
-
-        return accreditationStatus;
-    }
+    return accreditationStatus;
+  }
 }

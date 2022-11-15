@@ -1,7 +1,6 @@
 spring:
   application.name: accreditation-api
   mvc.pathmatch.matching-strategy: ant_path_matcher
-  autoconfigure.exclude: org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:yieldstreet}
@@ -17,9 +16,26 @@ spring:
       hibernate:
         jdbc.lob.non_contextual_creation: true
         format_sql: true
+  cloud:
+    stream:
+      kafka:
+        binder:
+          brokers: ${KAFKA_BROKERS:localhost}
+        bindings:
+          producer-out-0:
+            producer:
+              configuration:
+                value.serializer: com.yieldstreet.accreditation.audit.AccreditationStateChangeSerializer
+      function:
+        definition: producer
+      bindings:
+        producer-out-0:
+          destination: ${KAFKA_TOPIC:accreditations}
+          producer:
+            use-native-encoding: true
 
 server:
-  port: ${HTTP_PORT:8080}
+  port: ${HTTP_PORT:9999}
   forward-headers-strategy: framework
   error:
     include-message: always
@@ -29,3 +45,7 @@ logging:
     org.springframework.web: WARN
     org.hibernate: WARN
     org.apache: WARN
+
+yieldstreet:
+  accreditations:
+    expire_confirmed_days: ${EXPIRE_CONFIRMED_DAYS:30}

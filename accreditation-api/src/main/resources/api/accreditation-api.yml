@@ -1,8 +1,10 @@
 openapi: "3.0.0"
 info:
   title: User Accreditation API
-  description: Provides historical and real-time data reports.
+  description: Provides an API to manage user accreditation requests.
   version: 1.0.0
+
+
 paths:
   /user/accreditation:
     post:
@@ -15,7 +17,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref : '#/components/schemas/CreateAccreditationRequest'
+              $ref: '#/components/schemas/CreateAccreditationRequest'
       responses:
         200:
           description: Accreditation request was successful.
@@ -64,6 +66,7 @@ paths:
           name: userId
           schema:
             type: string
+            minLength: 1
           required: true
           description: ID of the user
       responses:
@@ -81,6 +84,7 @@ components:
       properties:
         user_id:
           type: string
+          minLength: 1
         accreditation_type:
           $ref: '#/components/schemas/AccreditationType'
         document:
@@ -95,10 +99,15 @@ components:
       properties:
         name:
           type: string
+          minLength: 1
+          maxLength: 1024
         mime_type:
           type: string
+          minLength: 3
+          pattern: '^[-\w.]+/[-\w.]+$'
         content:
           type: string
+          minLength: 1
       required:
         - name
         - mime_type
@@ -118,7 +127,6 @@ components:
           format: uuid
       required:
         - accreditation_id
-
 
     AccreditationStatusResponse:
       type: object
