@@ -3,6 +3,7 @@ package com.yieldstreet.accreditation.persistence;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
+import java.util.Objects;
 
 @Entity
 @Table(name = "users")
@@ -58,17 +59,26 @@ public class User implements Serializable {
   }
 
   @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    User user = (User) o;
+    return Objects.equals(id, user.id)
+        && Objects.equals(userId, user.userId)
+        && Objects.equals(createdTs, user.createdTs);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(id, userId, createdTs);
+  }
+
+  @Override
   public String toString() {
-    return "User{"
-        + "id="
-        + id
-        + '\''
-        + "userId="
-        + userId
-        + '\''
-        + "createdTs="
-        + createdTs
-        + '\''
-        + '}';
+    return "User{" +
+            "id=" + id +
+            ", userId='" + userId + '\'' +
+            ", createdTs=" + createdTs +
+            '}';
   }
 }

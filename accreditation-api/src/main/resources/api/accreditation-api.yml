@@ -136,12 +136,12 @@ components:
         accreditation_statuses:
           type: object
           additionalProperties:
-            $ref: "#/components/schemas/AccreditationStatus"
+            $ref: "#/components/schemas/AccreditationStatusDetails"
       required:
         - user_id
         - accreditation_statuses
 
-    AccreditationStatus:
+    AccreditationStatusDetails:
       type: object
       properties:
         accreditation_type:

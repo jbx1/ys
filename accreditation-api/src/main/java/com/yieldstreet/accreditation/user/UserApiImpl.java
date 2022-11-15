@@ -1,11 +1,10 @@
 package com.yieldstreet.accreditation.user;
 
+import com.yieldstreet.accreditation.mappers.AccreditationTypeMapper;
+import com.yieldstreet.accreditation.mappers.StatusMapper;
 import com.yieldstreet.accreditation.persistence.Accreditation;
 import com.yieldstreet.api.UserApi;
-import com.yieldstreet.model.AccreditationStatus;
-import com.yieldstreet.model.AccreditationStatusResponse;
-import com.yieldstreet.model.AccreditationType;
-import com.yieldstreet.model.Status;
+import com.yieldstreet.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -34,47 +33,27 @@ public class UserApiImpl implements UserApi {
     AccreditationStatusResponse response = new AccreditationStatusResponse();
     response.setUserId(userId);
 
-    Map<String, AccreditationStatus> accreditations =
+    Map<String, AccreditationStatusDetails> accreditations =
         userAccreditations.stream()
             .collect(
                 Collectors.toMap(
-                    accreditation -> accreditation.getId().toString(), this::mapToStatus));
+                    accreditation -> accreditation.getId().toString(), this::mapToStatusDetails));
 
     response.setAccreditationStatuses(accreditations);
 
     return ResponseEntity.ok(response);
   }
 
-  private AccreditationStatus mapToStatus(Accreditation accreditation) {
-    AccreditationStatus accreditationStatus = new AccreditationStatus();
-    switch (accreditation.getStatus()) {
-      case FAILED:
-        accreditationStatus.setStatus(Status.FAILED);
-        break;
+  private AccreditationStatusDetails mapToStatusDetails(Accreditation accreditation) {
 
-      case CONFIRMED:
-        accreditationStatus.setStatus(Status.CONFIRMED);
-        break;
+    Status status = StatusMapper.mapToStatus(accreditation.getStatus());
+    AccreditationType accreditationType =
+        AccreditationTypeMapper.mapPersistedAccreditationType(accreditation.getType());
 
-      case EXPIRED:
-        accreditationStatus.setStatus(Status.EXPIRED);
-        break;
+    AccreditationStatusDetails accreditationStatusDetails = new AccreditationStatusDetails();
+    accreditationStatusDetails.setStatus(status);
+    accreditationStatusDetails.setAccreditationType(accreditationType);
 
-      default:
-        accreditationStatus.setStatus(Status.PENDING);
-        break;
-    }
-
-    switch (accreditation.getType()) {
-      case BY_INCOME:
-        accreditationStatus.setAccreditationType(AccreditationType.INCOME);
-        break;
-
-      case BY_NET_WORTH:
-        accreditationStatus.setAccreditationType(AccreditationType.NET_WORTH);
-        break;
-    }
-
-    return accreditationStatus;
+    return accreditationStatusDetails;
   }
 }

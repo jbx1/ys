@@ -5,6 +5,7 @@ import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
+import java.util.Objects;
 import java.util.UUID;
 
 @Entity
@@ -138,35 +139,47 @@ public class Accreditation implements Serializable {
   }
 
   @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    Accreditation that = (Accreditation) o;
+    return Objects.equals(id, that.id)
+        && Objects.equals(user, that.user)
+        && type == that.type
+        && Objects.equals(documentName, that.documentName)
+        && Objects.equals(documentMimeType, that.documentMimeType)
+        && Objects.equals(documentContent, that.documentContent)
+        && status == that.status
+        && Objects.equals(createdTs, that.createdTs)
+        && Objects.equals(updatedTs, that.updatedTs);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(
+        id,
+        user,
+        type,
+        documentName,
+        documentMimeType,
+        documentContent,
+        status,
+        createdTs,
+        updatedTs);
+  }
+
+  @Override
   public String toString() {
-    return "Accreditation{"
-        + "id="
-        + id
-        + '\''
-        + "userId="
-        + (user == null ? "null" : user.getUserId())
-        + '\''
-        + "type="
-        + type
-        + '\''
-        + "documentName="
-        + documentName
-        + '\''
-        + "documentMimeType="
-        + documentMimeType
-        + '\''
-        + "documentContent="
-        + documentContent
-        + '\''
-        + "status="
-        + status
-        + '\''
-        + "createdTs="
-        + createdTs
-        + '\''
-        + "updatedTs="
-        + updatedTs
-        + '\''
-        + '}';
+    return "Accreditation{" +
+            "id=" + id +
+            ", user=" + user +
+            ", type=" + type +
+            ", documentName='" + documentName + '\'' +
+            ", documentMimeType='" + documentMimeType + '\'' +
+            ", documentContent='" + documentContent + '\'' +
+            ", status=" + status +
+            ", createdTs=" + createdTs +
+            ", updatedTs=" + updatedTs +
+            '}';
   }
 }
