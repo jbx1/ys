@@ -1,4 +1,4 @@
-version: "2"
+version: "3.8"
 
 services:
   zookeeper:
@@ -37,6 +37,25 @@ services:
       - POSTGRES_DB=yieldstreet
       - POSTGRES_USER=yieldstreet
       - POSTGRES_PASSWORD=password
+
+  accreditation-api:
+    image: com.yieldstreet/accreditation-api:1.0-SNAPSHOT
+    pull_policy: never
+    container_name: accreditation-api
+    ports:
+      - "9999:9999"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - DB_HOST=host.docker.internal
+      - DB_PORT=5432
+      - DB_USERNAME=yieldstreet
+      - DB_PASSWORD=password
+      - KAFKA_BROKERS=kafka:9092
+      - KAFKA_TOPIC=accreditations
+    depends_on:
+      - postgres
+      - kafka
 
 volumes:
   zookeeper_data:
