@@ -36,7 +36,7 @@ public class AdminApiController implements AdminApi {
     try {
       AccreditationResponse response = adminService.createAccreditation(request);
       return ResponseEntity.ok(response);
-    } catch (AdminService.InvalidOperationException ex) {
+    } catch (AdminService.AdminServiceError ex) {
       throw ex;
     } catch (Exception ex) {
       logger.error("Unable to perform operation", ex);
@@ -59,7 +59,7 @@ public class AdminApiController implements AdminApi {
           .finalizeAccreditation(accreditationId, request.getOutcome())
           .map(ResponseEntity::ok)
           .orElseGet(() -> ResponseEntity.notFound().build());
-    } catch (AdminService.InvalidOperationException ex) {
+    } catch (AdminService.AdminServiceError ex) {
       throw ex;
     } catch (Exception ex) {
       logger.error("Unable to perform operation", ex);
@@ -68,8 +68,6 @@ public class AdminApiController implements AdminApi {
           "Unable to perform the requested operation. Please refer to the logs for more details.");
     }
   }
-
-  //todo: create a separate exception for each case
 
   @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR, reason = "Unable to perform operation")
   public static class UnableToPerformOperationException extends RuntimeException {

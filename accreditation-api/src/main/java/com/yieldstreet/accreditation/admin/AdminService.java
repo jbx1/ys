@@ -56,9 +56,8 @@ public class AdminService {
     String userId = createAccreditationRequest.getUserId();
     List<Accreditation> pendingRequests = accreditationRepository.findByUserUserIdAndStatus(userId, Accreditation.AccreditationStatus.PENDING);
     if (!pendingRequests.isEmpty()) {
-      String msg = String.format("User %s already has %d PENDING request(s).", userId, pendingRequests.size());
-      logger.warn(msg);
-      throw new InvalidOperationException(msg);
+      logger.warn("User {} already has {} PENDING request(s).", userId, pendingRequests.size());
+      throw new UserAlreadyPendingAccreditationError(userId);
     }
 
     User user = getOrCreateUser(userId);
@@ -107,9 +106,8 @@ public class AdminService {
     }
 
     if (accreditation.getStatus().equals(Accreditation.AccreditationStatus.FAILED)) {
-      String msg = String.format("Accreditation request %s is already in FAILED status. Cannot update further.", accreditation.getId());
-      logger.warn(msg);
-      throw new InvalidOperationException(accreditation.getId() + " is already in FAILED status.");
+      logger.warn("Accreditation request {} is already in FAILED status. Cannot update further.", accreditation.getId());
+      throw new AccreditationAlreadyInFailedStateError(accreditation.getId());
     }
 
     updateUsingStampedLock(accreditation, newStatus);
@@ -171,8 +169,8 @@ public class AdminService {
     logger.debug("Updated {}", updated);
     if (updated == 0) {
       logger.warn(
-          "No accreditation status update took place! Did someone else updated it in parallel?");
-      throw new InvalidOperationException("Concurrent accreditation update aborted to avoid conflict.");
+          "No accreditation status update took place for {}! Did someone else updated it in parallel?", accreditation.getId());
+      throw new ConcurrentUpdateError(accreditation.getId());
     } else if (updated > 1) {
       logger.warn("Somehow more than one record was updated (which should be impossible).");
     }
@@ -210,9 +208,31 @@ public class AdminService {
   }
 
   @ResponseStatus(value = HttpStatus.BAD_REQUEST, reason = "Invalid Operation")
-  public static class InvalidOperationException extends RuntimeException {
-    public InvalidOperationException(String reason) {
+  public static class AdminServiceError extends RuntimeException {
+    public AdminServiceError(String reason) {
       super(reason);
     }
   }
+
+  @ResponseStatus(value = HttpStatus.BAD_REQUEST, reason = "User already pending accreditation")
+  public static class UserAlreadyPendingAccreditationError extends AdminServiceError {
+    public UserAlreadyPendingAccreditationError(String userId) {
+      super(userId + " is already pending accreditation.");
+    }
+  }
+
+  @ResponseStatus(value = HttpStatus.BAD_REQUEST, reason = "Concurrent Update Error")
+  public static class ConcurrentUpdateError extends AdminServiceError {
+    public ConcurrentUpdateError(UUID uuid) {
+      super("Concurrent update to " + uuid.toString());
+    }
+  }
+
+  @ResponseStatus(value = HttpStatus.BAD_REQUEST, reason = "Accreditation already in Failed state")
+  public static class AccreditationAlreadyInFailedStateError extends AdminServiceError {
+    public AccreditationAlreadyInFailedStateError(UUID uuid) {
+      super("Accreditation " + uuid.toString() + " already in failed state.");
+    }
+  }
+
 }

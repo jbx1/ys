@@ -101,12 +101,19 @@
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
             <version>5.9.0</version>
-            <scope>compile</scope>
+            <scope>test</scope>
         </dependency>
+
     </dependencies>
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.22.2</version>
+            </plugin>
+
             <plugin>
                 <groupId>org.openapitools</groupId>
                 <artifactId>openapi-generator-maven-plugin</artifactId>
@@ -125,6 +132,7 @@
                             <apiPackage>com.yieldstreet.api</apiPackage>
                             <modelPackage>com.yieldstreet.model</modelPackage>
                             <configOptions>
+                                <interfaceOnly>true</interfaceOnly>
                                 <useTags>true</useTags>
                                 <delegatePattern>false</delegatePattern>
                             </configOptions>
