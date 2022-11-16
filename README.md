@@ -4,6 +4,49 @@
 
 This project provides the implementation needed for the Yieldstreet Take Home challenge.
 
+## Quickstart
+
+### Pre-requisites:
+
+- Java 17
+- Maven
+- Docker and docker-compose
+
+### Build and Run
+
+From the root folder of the repository:
+
+1. Build the project
+
+`cd accreditation-api`
+
+`mvn clean install`
+
+2. Run the service together with its dependencies (Kafka, Zookeeper and Postgresql)
+
+`cd ..`
+
+`chmod 755 *.sh`
+
+`./start.sh`
+
+**It takes a couple of minutes for all the services to start up. Please be patient!**
+
+3. Once all the services are up and running, you will be able to see the OpenAPI documentation on:
+
+http://localhost:9999/swagger-ui/index.html
+
+4. You can also see the logs of the accreditation-api service by typing:
+
+`./logs.sh`
+
+Note that Kafka takes longer to start than the actual API service itself. For this reason you might see the service trying
+to establish a connection and failing repeatedly for a number of seconds until it establishes the connection successfully.
+
+5. To stop the services you can use the script:
+
+`./stop.sh`
+
 ### Technologies Used
 
 - OpenAPI 3.0

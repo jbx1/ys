@@ -32,6 +32,7 @@ public class AdminApiImpl implements AdminApi {
         request.getUserId(),
         request.getAccreditationType(),
         request.getDocument().getName());
+
     try {
       AccreditationResponse response = adminService.createAccreditation(request);
       return ResponseEntity.ok(response);
@@ -47,11 +48,15 @@ public class AdminApiImpl implements AdminApi {
 
   @Override
   public ResponseEntity<AccreditationResponse> finalizeAccreditation(
-      UUID accreditationId, FinaliseAccreditationRequest finaliseAccreditationRequest) {
+      UUID accreditationId, FinaliseAccreditationRequest request) {
+    logger.info(
+        "Received Finalize Accreditation Request for accreditation ID {} with outcome status {}",
+        accreditationId,
+        request.getOutcome());
 
     try {
       return adminService
-          .finalizeAccreditation(accreditationId, finaliseAccreditationRequest.getOutcome())
+          .finalizeAccreditation(accreditationId, request.getOutcome())
           .map(ResponseEntity::ok)
           .orElseGet(() -> ResponseEntity.notFound().build());
     } catch (AdminService.InvalidOperationException ex) {

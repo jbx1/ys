@@ -50,23 +50,6 @@ public class AdminService {
   }
 
   @Transactional
-  public void expireOldConfirmedAccreditations() {
-    OffsetDateTime updateBeforeTs = OffsetDateTime.now().minusDays(expireConfirmedDays);
-
-    List<Accreditation> oldConfirmedAccreditations =
-        accreditationRepository.findAccreditationByStatusAndUpdatedTsBefore(
-            Accreditation.AccreditationStatus.CONFIRMED, updateBeforeTs);
-    if (!oldConfirmedAccreditations.isEmpty()) {
-      logger.info(
-          "Expiring {} confirmed accreditations older than {}",
-          oldConfirmedAccreditations.size(),
-          updateBeforeTs);
-
-      oldConfirmedAccreditations.forEach(this::expireAccreditation);
-    }
-  }
-
-  @Transactional
   public AccreditationResponse createAccreditation(
       CreateAccreditationRequest createAccreditationRequest) {
 
@@ -97,6 +80,12 @@ public class AdminService {
     return new AccreditationResponse().accreditationId(accreditation.getId());
   }
 
+  /**
+   * Finalizes an accreditation to a specified final status.
+   * @param accreditationId the unique ID of the accreditation request
+   * @param status the status to be set
+   * @return the response containing the ID if the accreditation request exists, or empty if it does not exist
+   */
   @Transactional
   public Optional<AccreditationResponse> finalizeAccreditation(
       UUID accreditationId, FinalStatus status) {
@@ -131,6 +120,27 @@ public class AdminService {
 
     return new AccreditationResponse().accreditationId(accreditation.getId());
   }
+
+  /**
+   * Expires old CONFIRMED accreditations older than {@link #expireConfirmedDays}.
+   */
+  @Transactional
+  public void expireOldConfirmedAccreditations() {
+    OffsetDateTime updateBeforeTs = OffsetDateTime.now().minusDays(expireConfirmedDays);
+
+    List<Accreditation> oldConfirmedAccreditations =
+            accreditationRepository.findAccreditationByStatusAndUpdatedTsBefore(
+                    Accreditation.AccreditationStatus.CONFIRMED, updateBeforeTs);
+    if (!oldConfirmedAccreditations.isEmpty()) {
+      logger.info(
+              "Expiring {} confirmed accreditations older than {}",
+              oldConfirmedAccreditations.size(),
+              updateBeforeTs);
+
+      oldConfirmedAccreditations.forEach(this::expireAccreditation);
+    }
+  }
+
 
   private void expireAccreditation(Accreditation accreditation) {
     Accreditation.AccreditationStatus oldStatus = accreditation.getStatus();
