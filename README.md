@@ -40,8 +40,10 @@ http://localhost:9999/swagger-ui/index.html
 
 `./logs.sh`
 
-Note that Kafka takes longer to start than the actual API service itself. For this reason you might see the service trying
-to establish a connection and failing repeatedly for a number of seconds until it establishes the connection successfully.
+Note that Kafka takes longer to start than the actual API service itself. For this reason you might see the service
+trying
+to establish a connection and failing repeatedly for a number of seconds until it establishes the connection
+successfully.
 
 5. To stop the services you can use the script:
 
@@ -52,6 +54,7 @@ to establish a connection and failing repeatedly for a number of seconds until i
 - OpenAPI 3.0
 - Spring Boot as the main IoC framework.
 - Spring Data and JPA to write to the database.
+- FlywayDB for database migration scripts.
 - PostgreSQL as the relational database.
 - Apache Kafka for the audit trail.
 
@@ -79,8 +82,7 @@ responsibilities clearer, and it would be easier to make specific security check
 roles.
 
 The business logic is then implemented into two separate services, one for admin and one for the user. Each service
-makes use
-of JPA entities and the associated repositories to.
+makes use of JPA entities and the associated repositories to.
 
 Each admin operation is implemented within one database transaction boundary. This means that if anything goes wrong
 midway, including sending the message to the Kafka topic, the transaction would be rolled back.
