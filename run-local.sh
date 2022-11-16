@@ -9,5 +9,5 @@ export KAFKA_BROKERS=localhost:9093
 export KAFKA_TOPIC=accreditations
 export HTTP_PORT=9998
 
-java -jar ./accreditation-api/target/accreditation-api-1.0-SNAPSHOT.jar &
+java -jar ./accreditation-api/target/accreditation-api-1.0-SNAPSHOT.jar
 
