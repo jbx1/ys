@@ -1,5 +1,6 @@
 package com.yieldstreet.accreditation.user;
 
+import com.yieldstreet.accreditation.mappers.AccreditationMapper;
 import com.yieldstreet.accreditation.mappers.AccreditationTypeMapper;
 import com.yieldstreet.accreditation.mappers.StatusMapper;
 import com.yieldstreet.accreditation.persistence.Accreditation;
@@ -15,13 +16,13 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
-public class UserApiImpl implements UserApi {
+public class UserApiController implements UserApi {
 
-  private static final Logger logger = LoggerFactory.getLogger(UserApiImpl.class);
+  private static final Logger logger = LoggerFactory.getLogger(UserApiController.class);
 
   private final UserService userService;
 
-  public UserApiImpl(UserService userService) {
+  public UserApiController(UserService userService) {
     this.userService = userService;
   }
 
@@ -37,23 +38,10 @@ public class UserApiImpl implements UserApi {
         userAccreditations.stream()
             .collect(
                 Collectors.toMap(
-                    accreditation -> accreditation.getId().toString(), this::mapToStatusDetails));
+                    accreditation -> accreditation.getId().toString(), AccreditationMapper::mapToStatusDetails));
 
     response.setAccreditationStatuses(accreditations);
 
     return ResponseEntity.ok(response);
-  }
-
-  private AccreditationStatusDetails mapToStatusDetails(Accreditation accreditation) {
-
-    Status status = StatusMapper.mapToStatus(accreditation.getStatus());
-    AccreditationType accreditationType =
-        AccreditationTypeMapper.mapPersistedAccreditationType(accreditation.getType());
-
-    AccreditationStatusDetails accreditationStatusDetails = new AccreditationStatusDetails();
-    accreditationStatusDetails.setStatus(status);
-    accreditationStatusDetails.setAccreditationType(accreditationType);
-
-    return accreditationStatusDetails;
   }
 }

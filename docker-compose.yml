@@ -49,6 +49,7 @@ services:
     environment:
       - DB_HOST=host.docker.internal
       - DB_PORT=5432
+      - DB_NAME=yieldstreet
       - DB_USERNAME=yieldstreet
       - DB_PASSWORD=password
       - KAFKA_BROKERS=kafka:9092

@@ -13,13 +13,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-public class AdminApiImpl implements AdminApi {
+public class AdminApiController implements AdminApi {
 
-  private static final Logger logger = LoggerFactory.getLogger(AdminApiImpl.class);
+  private static final Logger logger = LoggerFactory.getLogger(AdminApiController.class);
 
   private final AdminService adminService;
 
-  public AdminApiImpl(AdminService adminService) {
+  public AdminApiController(AdminService adminService) {
     this.adminService = adminService;
   }
 
@@ -68,6 +68,8 @@ public class AdminApiImpl implements AdminApi {
           "Unable to perform the requested operation. Please refer to the logs for more details.");
     }
   }
+
+  //todo: create a separate exception for each case
 
   @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR, reason = "Unable to perform operation")
   public static class UnableToPerformOperationException extends RuntimeException {

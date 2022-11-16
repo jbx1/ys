@@ -74,6 +74,10 @@ public class Accreditation implements Serializable {
     return id;
   }
 
+  public void setId(UUID id) {
+    this.id = id;
+  }
+
   public void setUser(User user) {
     this.user = user;
   }

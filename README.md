@@ -12,6 +12,8 @@ This project provides the implementation needed for the Yieldstreet Take Home ch
 - Maven 3.6 or later
 - Docker and docker-compose version 20.10
 
+* Make sure you do not have anything else running on ports 2181, 5432, 9092, 9093, and 9999 to avoid conflicts. * 
+
 ### Build and Run
 
 From the root folder of the repository:
