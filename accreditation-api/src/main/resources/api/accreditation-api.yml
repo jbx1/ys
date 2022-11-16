@@ -101,13 +101,16 @@ components:
           type: string
           minLength: 1
           maxLength: 1024
+          example: '2018.pdf'
         mime_type:
           type: string
           minLength: 3
           pattern: '^[-\w.]+/[-\w.]+$'
+          example: 'application/pdf'
         content:
           type: string
           minLength: 1
+          example: 'ICAiQC8qIjogWyJzcmMvKiJdCiAgICB9CiAgfQp9Cg=='
       required:
         - name
         - mime_type
@@ -133,6 +136,7 @@ components:
       properties:
         user_id:
           type: string
+          example: 'g8NlYJnk7zK9BlB1J2Ebjs0AkhCTpE1V'
         accreditation_statuses:
           type: object
           additionalProperties:
