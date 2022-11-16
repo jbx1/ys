@@ -85,6 +85,8 @@ components:
         user_id:
           type: string
           minLength: 1
+          maxLength: 255
+          example: 'g8NlYJnk7zK9BlB1J2Ebjs0AkhCTpE1V'
         accreditation_type:
           $ref: '#/components/schemas/AccreditationType'
         document:

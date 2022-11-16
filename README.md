@@ -9,8 +9,8 @@ This project provides the implementation needed for the Yieldstreet Take Home ch
 ### Pre-requisites:
 
 - Java 17
-- Maven
-- Docker and docker-compose
+- Maven 3.6 or later
+- Docker and docker-compose version 20.10
 
 ### Build and Run
 
@@ -41,13 +41,29 @@ http://localhost:9999/swagger-ui/index.html
 `./logs.sh`
 
 Note that Kafka takes longer to start than the actual API service itself. For this reason you might see the service
-trying
-to establish a connection and failing repeatedly for a number of seconds until it establishes the connection
+trying to establish a connection and failing repeatedly for a number of seconds until it establishes the connection
 successfully.
 
 5. To stop the services you can use the script:
 
 `./stop.sh`
+
+### Running it locally without Docker
+
+The build script generates an executable JAR file at: `~/accreditation-api/target/accreditation-api-1.0-SNAPSHOT.jar`
+This is a "fat jar" containing all dependencies inside it, and can be executed with `java -jar`.
+
+A script has also been included to start the API in this mode if required, at the root of the repository.
+It includes all the respective environment variables to connect to the same services (Kafka and PostgreSQL) as defined
+in the docker-compose definition. If you want to change any configuration, such as IP addresses or ports, you can do it in that by editing the file.
+
+`./run-local.sh`
+
+Note that in this case it is configured to listen on port 9998 (not 9999) so that it does not conflict with the other
+API service exposed through docker-compose. Again, you can change it by editing `run-local.sh`
+
+You can test whether it is running by going to:
+http://localhost:9998/swagger-ui/index.html
 
 ### Technologies Used
 
