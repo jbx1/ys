@@ -23,7 +23,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class AdminApiControllerTest {
+class AdminApiControllerTest {
 
     @Mock
     private AdminService mockAdminService;
@@ -77,9 +77,149 @@ public class AdminApiControllerTest {
                 .andExpect(content().json(expected));
     }
 
-    //todo: corrupt json request
+    @Test
+    void missingTags() throws Exception {
 
-    //todo: invalid userID
-    //todo: missing document details
-    //todo: invalid type
+        String missingTag = "{\n" +
+                "  \"accreditation_type\": \"BY_INCOME\",\n" +
+                "  \"document\": {\n" +
+                "    \"content\": \"ICAiQC8qIjogWyJzcmMvKiJdCiAgICB9CiAgfQp9Cg==\",\n" +
+                "    \"mime_type\": \"application/pdf\",\n" +
+                "    \"name\": \"2018.pdf\"\n" +
+                "  }\n" +
+                "}";
+
+        mockMvc.perform(post(USER_ACCREDITATION)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(missingTag))
+                .andExpect(status().is4xxClientError());
+
+        missingTag = "{\n" +
+                " \"user_id\": \"1231421\",\n" +
+                "  \"document\": {\n" +
+                "    \"content\": \"ICAiQC8qIjogWyJzcmMvKiJdCiAgICB9CiAgfQp9Cg==\",\n" +
+                "    \"mime_type\": \"application/pdf\",\n" +
+                "    \"name\": \"2018.pdf\"\n" +
+                "  }\n" +
+                "}";
+
+        mockMvc.perform(post(USER_ACCREDITATION)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(missingTag))
+                .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    void missingDocumentDetails() throws Exception {
+        String missingDocDetails = "{\n" +
+                " \"user_id\": \"1231421\",\n" +
+                "  \"accreditation_type\": \"BY_INCOME\",\n" +
+                "  \"document\": {\n" +
+                "    \"mime_type\": \"application/pdf\",\n" +
+                "    \"name\": \"2018.pdf\"\n" +
+                "  }\n" +
+                "}";
+
+        mockMvc.perform(post(USER_ACCREDITATION)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(missingDocDetails))
+                .andExpect(status().is4xxClientError());
+
+        missingDocDetails = "{\n" +
+                " \"user_id\": \"1231421\",\n" +
+                "  \"accreditation_type\": \"BY_INCOME\",\n" +
+                "  \"document\": {\n" +
+                "    \"content\": \"ICAiQC8qIjogWyJzcmMvKiJdCiAgICB9CiAgfQp9Cg==\",\n" +
+                "    \"name\": \"2018.pdf\"\n" +
+                "  }\n" +
+                "}";
+
+        mockMvc.perform(post(USER_ACCREDITATION)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(missingDocDetails))
+                .andExpect(status().is4xxClientError());
+
+        missingDocDetails = "{\n" +
+                " \"user_id\": \"1231421\",\n" +
+                "  \"accreditation_type\": \"BY_INCOME\",\n" +
+                "  \"document\": {\n" +
+                "    \"content\": \"ICAiQC8qIjogWyJzcmMvKiJdCiAgICB9CiAgfQp9Cg==\",\n" +
+                "    \"mime_type\": \"application/pdf\"\n" +
+                "  }\n" +
+                "}";
+
+        mockMvc.perform(post(USER_ACCREDITATION)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(missingDocDetails))
+                .andExpect(status().is4xxClientError());
+
+        missingDocDetails = "{\n" +
+                " \"user_id\": \"1231421\",\n" +
+                "  \"accreditation_type\": \"BY_INCOME\"\n" +
+                "}";
+
+        mockMvc.perform(post(USER_ACCREDITATION)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(missingDocDetails))
+                .andExpect(status().is4xxClientError());
+
+    }
+
+    @Test
+    void emptyUserId() throws Exception {
+        CreateAccreditationRequest request = new CreateAccreditationRequest();
+        request.setUserId("");
+        request.setAccreditationType(AccreditationType.INCOME);
+        request.setDocument(new Document()
+                .name("2018.pdf")
+                .mimeType("application/pdf")
+                .content("952109582109582gkdsgsdg"));
+
+        mockMvc.perform(post(USER_ACCREDITATION)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    void emptyType() throws Exception {
+        CreateAccreditationRequest request = new CreateAccreditationRequest();
+        request.setUserId("1345215");
+        request.setDocument(new Document()
+                .name("2018.pdf")
+                .mimeType("application/pdf")
+                .content("952109582109582gkdsgsdg"));
+
+        mockMvc.perform(post(USER_ACCREDITATION)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    void invalidType() throws Exception {
+        String invalidType = "{\n" +
+                " \"user_id\": \"1231421\",\n" +
+                "  \"accreditation_type\": \"BY_NOTHING\",\n" +
+                "  \"document\": {\n" +
+                "    \"name\": \"2018.pdf\",\n" +
+                "    \"content\": \"ICAiQC8qIjogWyJzcmMvKiJdCiAgICB9CiAgfQp9Cg==\",\n" +
+                "    \"mime_type\": \"application/pdf\"\n" +
+                "  }\n" +
+                "}";
+
+        mockMvc.perform(post(USER_ACCREDITATION)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(invalidType))
+                .andExpect(status().is4xxClientError());
+    }
 }
